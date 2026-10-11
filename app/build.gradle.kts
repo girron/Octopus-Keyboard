@@ -6,6 +6,13 @@ plugins {
     kotlin("plugin.compose") version "2.4.0"
 }
 
+// Do not commit google-services.json. It is supplied locally or through a CI secret.
+val octopusFirebaseConfigured = file("google-services.json").isFile
+if (octopusFirebaseConfigured) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+}
+
 android {
     compileSdk = 37
 
@@ -13,8 +20,9 @@ android {
         applicationId = "helium314.keyboard"
         minSdk = 21
         targetSdk = 37
-        versionCode = 4226
-        versionName = "4.2-beta1-octopus26"
+        versionCode = 4227
+        versionName = "4.2-beta1-octopus27-diagnostics"
+        buildConfigField("boolean", "OCTOPUS_CRASHLYTICS_CONFIGURED", octopusFirebaseConfigured.toString())
         ndk {
             abiFilters.clear()
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
@@ -127,6 +135,9 @@ android {
 }
 
 dependencies {
+    // Diagnostics SDK is included only in debug builds; no Analytics SDK.
+    debugImplementation("com.google.firebase:firebase-crashlytics:19.4.4")
+
     // androidx
     implementation("androidx.core:core-ktx:1.17.0") // 1.18.0 requires minSdk 23
     implementation("androidx.recyclerview:recyclerview:1.4.0")

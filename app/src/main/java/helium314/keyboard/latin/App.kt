@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class App : Application() {
+open class App : Application() {
     override fun onCreate() {
         super.onCreate()
         DebugFlags.init(this)

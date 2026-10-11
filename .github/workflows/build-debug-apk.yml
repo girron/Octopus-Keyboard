@@ -71,6 +71,16 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare optional Firebase beta configuration
+        env:
+          OCTOPUS_FIREBASE_JSON_B64: ${{ secrets.OCTOPUS_FIREBASE_JSON_B64 }}
+        run: |
+          if [ -n "$OCTOPUS_FIREBASE_JSON_B64" ]; then
+            printf '%s' "$OCTOPUS_FIREBASE_JSON_B64" | base64 --decode > app/google-services.json
+          else
+            echo "No Firebase config secret. Building without active Crashlytics."
+          fi
+
       - name: Build with Gradle
         env:
           OCTOPUS_DEBUG_KEYSTORE: /home/runner/.android/debug.keystore

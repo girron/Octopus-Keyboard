@@ -1323,4 +1323,6 @@ New dictionary:
     <string name="gesture_data_swipe_o_scope">Tool for visualizing gesture data: &lt;a href=%s&gt;Swipe-O-Scope&lt;/a&gt;</string>
 
     <!-- new strings should go above the section for gesture data gathering -->
+    <string name="octopus_crash_reports">Share beta crash diagnostics</string>
+    <string name="octopus_crash_reports_summary">Optional crash reports and device information. Does not intentionally log typed words or clipboard contents.</string>
 </resources>
