@@ -374,6 +374,20 @@ public final class InputLogic {
     // interface
     public InputTransaction onPickSuggestionManually(SettingsValues settingsValues, SuggestedWordInfo suggestionInfo,
             CapsMode keyboardCapsMode, String currentKeyboardScript, LatinIME.UIHandler handler) {
+        return onPickSuggestionManually(settingsValues, suggestionInfo, keyboardCapsMode,
+                currentKeyboardScript, handler, false);
+    }
+
+    public InputTransaction onPickOctopusSuggestionManually(SettingsValues settingsValues,
+            SuggestedWordInfo suggestionInfo, CapsMode keyboardCapsMode,
+            String currentKeyboardScript, LatinIME.UIHandler handler) {
+        return onPickSuggestionManually(settingsValues, suggestionInfo, keyboardCapsMode,
+                currentKeyboardScript, handler, true);
+    }
+
+    private InputTransaction onPickSuggestionManually(SettingsValues settingsValues,
+            SuggestedWordInfo suggestionInfo, CapsMode keyboardCapsMode,
+            String currentKeyboardScript, LatinIME.UIHandler handler, boolean octopusSwipe) {
         if (isInlineEmojiSearchAction()) {
             deleteTextReplacedByEmoji();
         }
@@ -404,6 +418,26 @@ public final class InputLogic {
         // for the sequence of language switching.
         inputTransaction.setDidAffectContents();
         mConnection.beginBatchEdit();
+        // Some editors (including prediction-only fields) commit each typed letter
+        // immediately rather than maintaining a composing region. A normal manual
+        // pick would append to that committed prefix. Replace the real word at the
+        // cursor for Octopus key swipes, but leave ordinary suggestion picks alone.
+        if (octopusSwipe && !mWordComposer.isComposingWord()
+                && !mConnection.hasSelection()
+                && settingsValues.mSpacingAndPunctuations.mCurrentLanguageHasSpaces) {
+            final TextRange wordRange = mConnection.getWordRangeAtCursor(
+                    settingsValues.mSpacingAndPunctuations, currentKeyboardScript);
+            if (wordRange != null && wordRange.length() > 0 && !wordRange.mHasUrlSpans) {
+                final int beforeCursor = wordRange.getNumberOfCharsInWordBeforeCursor();
+                final int afterCursor = wordRange.getNumberOfCharsInWordAfterCursor();
+                final int cursor = mConnection.getExpectedSelectionStart();
+                if (beforeCursor > 0 && cursor >= beforeCursor
+                        && mConnection.setSelection(cursor - beforeCursor, cursor + afterCursor)) {
+                    // We are replacing a word, not starting the next word.
+                    mSpaceState = SpaceState.NONE;
+                }
+            }
+        }
         if (SpaceState.PHANTOM == mSpaceState && suggestion.length() > 0
                 // In the batch input mode, a manually picked suggested word should just replace
                 // the current batch input text and there is no need for a phantom space.
