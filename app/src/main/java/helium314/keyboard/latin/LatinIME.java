@@ -1656,7 +1656,7 @@ public class LatinIME extends InputMethodService implements
     }
 
     public void pickOctopusSuggestionManually(final SuggestedWordInfo suggestionInfo) {
-        final InputTransaction completeInputTransaction = mInputLogic.onPickSuggestionManually(
+        final InputTransaction completeInputTransaction = mInputLogic.onPickOctopusSuggestionManually(
                 mSettings.getCurrent(), suggestionInfo,
                 mKeyboardSwitcher.getKeyboardCapsMode(),
                 mKeyboardSwitcher.getCurrentKeyboardScript(),
